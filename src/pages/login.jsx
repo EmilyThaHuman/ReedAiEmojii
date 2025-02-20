@@ -33,10 +33,15 @@ export default function LoginPage() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         <img
-          src="/placeholder.svg"
-          alt="Login background"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          src="https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2070&auto=format&fit=crop"
+          alt="Colorful abstract gradient"
+          className="absolute inset-0 h-full w-full object-cover opacity-90 dark:opacity-40"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-background/20" />
+        <div className="absolute bottom-8 left-8 max-w-md text-white">
+          <h2 className="mb-2 text-2xl font-bold">AI Emoji Generator</h2>
+          <p className="text-muted-foreground">Create unique and personalized emojis using the power of artificial intelligence</p>
+        </div>
       </div>
     </div>
   );

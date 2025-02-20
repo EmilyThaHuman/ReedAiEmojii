@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { initializeAI } from './ai-service';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -7,7 +8,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+  storage: {
+    retryAttempts: 3,
+    retryDelay: 500,
+  },
+});
 
 export async function signInWithEmail(email, password) {
   return await supabase.auth.signInWithPassword({
@@ -16,14 +26,42 @@ export async function signInWithEmail(email, password) {
   });
 }
 
-export async function signUpWithEmail(email, password) {
-  return await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${window.location.origin}/auth/callback`,
-    },
-  });
+export async function signUpWithEmail(email, password, displayName = null) {
+  try {
+    // Sign up the user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      }
+    });
+
+    if (authError) throw authError;
+
+    // Create or update the user's profile with display name
+    if (authData?.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: authData.user.id,
+          email: email,
+          display_name: displayName || email.split('@')[0],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        // Don't throw here as the user is already created
+      }
+    }
+
+    return { data: authData, error: null };
+  } catch (error) {
+    console.error('Signup error:', error);
+    return { data: null, error };
+  }
 }
 
 export async function signOut() {
@@ -33,15 +71,33 @@ export async function signOut() {
 export async function getCurrentUser() {
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
-    // Get user profile data including API key
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    try {
+      // Get user profile data including API key
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-    if (profile?.openai_api_key) {
-      localStorage.setItem('openai_api_key', profile.openai_api_key);
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return user;
+      }
+
+      if (profile?.openai_api_key) {
+        // Store API key in localStorage
+        localStorage.setItem('openai_api_key', profile.openai_api_key);
+        // Initialize AI service with the key
+        initializeAI(profile.openai_api_key);
+      } else {
+        // If no API key in profile but exists in localStorage, save it to profile
+        const localApiKey = localStorage.getItem('openai_api_key');
+        if (localApiKey) {
+          await updateUserApiKey(user.id, localApiKey);
+        }
+      }
+    } catch (error) {
+      console.error('Error in getCurrentUser:', error);
     }
   }
   return user;
@@ -228,5 +284,76 @@ export async function deleteEmoji(emojiId) {
   } catch (error) {
     console.error('Error deleting emoji:', error);
     throw error;
+  }
+}
+
+export async function saveSubscription(userId, subscriptionData) {
+  try {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .upsert({
+        user_id: userId,
+        plan: subscriptionData.plan,
+        credits_used: subscriptionData.creditsUsed || 0,
+        current_period_start: subscriptionData.currentPeriodStart.toISOString(),
+        current_period_end: subscriptionData.currentPeriodEnd.toISOString(),
+        status: subscriptionData.status || 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id'
+      });
+
+    if (error) {
+      console.error('Error saving subscription:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in saveSubscription:', error);
+    throw error;
+  }
+}
+
+export async function updateProfile(userId, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return { data: null, error };
+  }
+}
+
+export async function getProfile(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return { data: null, error };
   }
 } 

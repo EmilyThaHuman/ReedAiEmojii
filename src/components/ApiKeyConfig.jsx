@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { validateApiKey, initializeAI } from '@/lib/ai-service';
 import { updateUserApiKey } from '@/lib/supabase';
 import useAuthStore from '@/lib/store/auth-store';
@@ -11,6 +11,19 @@ export function ApiKeyConfig({ onConfigured }) {
   const user = useAuthStore((state) => state.user);
   const setApiKeyStore = useAuthStore((state) => state.setApiKey);
 
+  // Load existing API key from user profile on mount
+  useEffect(() => {
+    const loadApiKey = async () => {
+      if (user) {
+        const storedKey = localStorage.getItem('openai_api_key');
+        if (storedKey) {
+          setApiKey(storedKey);
+        }
+      }
+    };
+    loadApiKey();
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsValidating(true);
@@ -22,15 +35,24 @@ export function ApiKeyConfig({ onConfigured }) {
         // Initialize AI service
         initializeAI(apiKey);
         
-        // Save to Zustand store
+        // Save to Zustand store and localStorage
         setApiKeyStore(apiKey);
         
         // If user is authenticated, save to Supabase
         if (user) {
-          await updateUserApiKey(user.id, apiKey);
+          try {
+            await updateUserApiKey(user.id, apiKey);
+          } catch (err) {
+            console.error('Error saving API key to profile:', err);
+            setError('Failed to save API key to your profile. Please try again.');
+            setIsValidating(false);
+            return;
+          }
         }
         
-        onConfigured();
+        if (onConfigured) {
+          onConfigured();
+        }
       } else {
         setError('Invalid API key. Please check and try again.');
       }
@@ -75,7 +97,7 @@ export function ApiKeyConfig({ onConfigured }) {
         </Button>
       </form>
       <p className="text-sm text-muted-foreground">
-        Your API key is stored locally and never sent to our servers.
+        Your API key is stored securely in your profile and locally for convenience.
         Get your API key from the{' '}
         <a
           href="https://platform.openai.com/api-keys"

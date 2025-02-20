@@ -8,6 +8,7 @@ export function SignUpForm({ onToggleForm }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export function SignUpForm({ onToggleForm }) {
     setIsLoading(true);
 
     try {
-      const { data, error } = await signUpWithEmail(email, password);
+      const { data, error } = await signUpWithEmail(email, password, displayName);
       
       if (error) {
         throw error;
@@ -34,7 +35,7 @@ export function SignUpForm({ onToggleForm }) {
 
       setUser(data.user);
       setSession(data.session);
-      navigate('/');
+      navigate('/onboarding');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -47,10 +48,26 @@ export function SignUpForm({ onToggleForm }) {
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold">Create an Account</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          Enter your email below to create your account
+          Enter your details below to create your account
         </p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label
+            htmlFor="displayName"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Display Name
+          </label>
+          <input
+            id="displayName"
+            type="text"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            required
+          />
+        </div>
         <div className="space-y-2">
           <label
             htmlFor="email"

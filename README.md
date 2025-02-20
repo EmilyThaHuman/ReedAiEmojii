@@ -20,6 +20,7 @@ A modern web application that generates custom emojis using AI technology. Built
 - **AI**: OpenAI DALL-E 3
 - **Payments**: Stripe
 - **Authentication**: Supabase Auth
+- **Deployment**: Netlify
 
 ## Getting Started
 
@@ -60,6 +61,23 @@ VITE_STRIPE_PRO_PRICE_ID=your_stripe_price_id
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 - `npm run format` - Format code with Prettier
+
+## Deployment
+
+This project is configured for deployment on Netlify. To deploy:
+
+1. Connect your GitHub repository to Netlify
+2. Configure the following build settings:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+   - Node version: 20.x
+3. Set up your environment variables in Netlify's dashboard
+4. Deploy!
+
+The project includes:
+- `netlify.toml` - Build settings and redirects
+- `_redirects` - URL rewrite rules for SPA routing
+- `netlify/functions/` - Serverless functions
 
 ## Contributing
 

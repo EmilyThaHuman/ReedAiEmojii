@@ -5,6 +5,7 @@ import { GalleryVerticalEnd, ArrowRight, Check, Sparkles, Loader2 } from 'lucide
 import useAuthStore from '@/lib/store/auth-store';
 import { ApiKeyConfig } from '@/components/ApiKeyConfig';
 import { createCheckoutSession } from '@/lib/stripe-service';
+import { saveSubscription } from '@/lib/supabase';
 import { STRIPE_PRICES } from '@/lib/stripe-service';
 
 const PLANS = {
@@ -117,22 +118,38 @@ export default function OnboardingPage() {
       }
       
       setCurrentStep(currentStep + 1);
-    } else {
+    
       // Complete onboarding
       setOnboardingComplete(true);
       
       // Set initial subscription for free plan
       if (selectedPlan?.name === 'Free') {
-        setSubscription({
-          plan: 'Free',
-          credits: 10,
-          creditsUsed: 0,
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-        navigate('/generate');
+        try {
+          setIsProcessing(true);
+          
+          const subscriptionData = {
+            plan: 'Free',
+            creditsUsed: 0,
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            status: 'active'
+          };
+
+          // Save to Supabase
+          await saveSubscription(user.id, subscriptionData);
+          
+          // Update local state
+          setSubscription(subscriptionData);
+          
+          navigate('/generate');
+        } catch (err) {
+          console.error('Error saving free subscription:', err);
+          setError('Failed to set up your free subscription. Please try again.');
+          setIsProcessing(false);
+          return;
+        } finally {
+          setIsProcessing(false);
+        }
       }
     }
   };
