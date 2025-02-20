@@ -1,19 +1,34 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from '../supabase';
+import { supabase, getProfile } from '../supabase';
 
 const useAuthStore = create(
   persist(
     (set, get) => ({
       user: null,
       session: null,
+      profile: null,
       isAuthenticated: false,
       hasCompletedOnboarding: false,
       subscription: null,
       apiKey: localStorage.getItem('openai_api_key') || null,
       
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      setUser: async (user) => {
+        set({ user, isAuthenticated: !!user });
+        if (user) {
+          // Load user profile
+          const { data: profile } = await getProfile(user.id);
+          if (profile) {
+            set({ profile });
+            if (profile.openai_api_key) {
+              localStorage.setItem('openai_api_key', profile.openai_api_key);
+            }
+          }
+        }
+      },
+      
       setSession: (session) => set({ session }),
+      setProfile: (profile) => set({ profile }),
       setOnboardingComplete: (completed) => set({ hasCompletedOnboarding: completed }),
       
       setSubscription: (subscription) => set({ 
@@ -155,6 +170,7 @@ const useAuthStore = create(
         set({
           user: null,
           session: null,
+          profile: null,
           isAuthenticated: false,
           hasCompletedOnboarding: false,
           subscription: null,
