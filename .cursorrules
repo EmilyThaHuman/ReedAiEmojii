@@ -1,0 +1,54 @@
+{
+  "formatter": {
+    "indentSize": 2,
+    "lineWidth": 100,
+    "useTabs": false,
+    "semicolons": true,
+    "quotes": "single",
+    "trailingComma": "es5"
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParens": "always",
+      "bracketSpacing": true,
+      "jsxBracketSameLine": false,
+      "jsxSingleQuote": false,
+      "printWidth": 100,
+      "proseWrap": "preserve",
+      "semi": true,
+      "singleQuote": true,
+      "tabWidth": 2,
+      "trailingComma": "es5"
+    },
+    "compiler": {
+      "module": "ESNext",
+      "target": "ESNext",
+      "jsx": "react-jsx",
+      "strict": true,
+      "moduleResolution": "bundler",
+      "allowJs": true,
+      "esModuleInterop": true
+    }
+  },
+  "organizeImports": {
+    "enable": true,
+    "groupRules": [
+      "^react",
+      "^@/",
+      "^[./]"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "no-unused-vars": "warn",
+      "no-console": "warn",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn"
+    }
+  },
+  "ai": {
+    "prefix": "// AI:",
+    "generateTests": true,
+    "generateDocs": true
+  }
+}
