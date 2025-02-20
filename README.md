@@ -2,6 +2,14 @@
 
 A modern web application that generates custom emojis using AI technology. Built with React, Vite, and powered by OpenAI's DALL-E 3.
 
+## Screenshots
+
+### Landing Page
+![Landing Page](/public/landing.png)
+
+### Emoji Generator
+![Emoji Generator](/public/generate.png)
+
 ## Features
 
 - 🎨 AI-powered emoji generation
