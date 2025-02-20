@@ -20,6 +20,40 @@ A modern web application that generates custom emojis using AI technology. Built
 - 🖼️ Personal emoji gallery
 - ⚡ Fast and modern tech stack
 
+## Emoji Generation
+
+The application uses an optimized system prompt to generate high-quality, emoji-style images. Here's the recommended prompt structure:
+
+```
+Create a simple, expressive emoji in a modern flat design style with these characteristics:
+- Solid color background removed (transparent)
+- Clean, minimalist design with smooth edges
+- Vibrant, solid colors without gradients
+- Consistent line weight and style
+- Simple facial features or elements
+- No text or numbers
+- Square aspect ratio (1:1)
+- Centered composition
+- Size: 512x512 pixels
+
+The emoji should be: [user's description]
+
+Style: Modern, flat design emoji similar to Apple or Google emoji style
+```
+
+This prompt structure helps ensure:
+- Consistent emoji-like appearance
+- Clean, professional results
+- Proper transparency and sizing
+- Style matching modern emoji standards
+- Optimal composition for various use cases
+
+For best results, user descriptions should be clear and concise, focusing on:
+- Main emotion or concept
+- Key visual elements
+- Color preferences (if any)
+- Specific style references
+
 ## Tech Stack
 
 - **Frontend**: React, Vite, TypeScript
