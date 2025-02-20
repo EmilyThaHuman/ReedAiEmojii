@@ -23,7 +23,38 @@ export async function generateEmoji(description) {
   }
 
   try {
-    const prompt = `Create a simple, expressive emoji in a modern style based on this description: ${description}. The emoji should be clear, minimalist, and suitable for use as an actual emoji. Make it centered and isolated on a transparent background.`;
+    const prompt = `Create a modern emoji design following these precise specifications:
+
+STYLE FUNDAMENTALS:
+- Flat design with minimal, strategic shading
+- Bold, clear shapes with 2px consistent outlines
+- 8px minimum corner radius for smooth appearance
+- Scalable design (readable from 512px to 32px)
+- Clean silhouette and instant recognizability
+- Contemporary emoji aesthetic (Apple/Google style)
+
+TECHNICAL SPECIFICATIONS:
+- Canvas: 512x512px square format
+- Background: Transparent
+- Color Space: sRGB
+- Primary Colors: Bold, saturated tones
+- Secondary Colors: Subtle highlights/shadows
+- Minimum contrast ratio: 3:1
+- Maximum 4 primary colors + shading
+
+COMPOSITION RULES:
+- Centered primary elements
+- Strategic negative space
+- Balanced visual weight
+- Clear read at all sizes
+- No text or numbers
+- No complex patterns or textures
+- No culturally sensitive elements
+
+CONCEPT TO ILLUSTRATE:
+${description}
+
+IMPORTANT: Generate a culturally-appropriate, inclusive design that maintains professional emoji standards while being unique and expressive. Ensure the design is instantly readable and maintains its impact at both large and small scales.`;
 
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -32,7 +63,7 @@ export async function generateEmoji(description) {
       size: "1024x1024",
       quality: "standard",
       response_format: "b64_json",
-      style: "natural",
+      style: "vivid",
     });
 
     return {
